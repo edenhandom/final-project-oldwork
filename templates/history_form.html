@@ -1,9 +1,11 @@
 <!-- Look at top artists/songs -> Get user mood -->
-{% extends "layout.html" %} {% {% block content %}
-    {% {% if error_message %}
+{% extends "layout.html" %} 
+
+{% block content %}
+  {% if error_message %}
         <p>{{ error_message }} </p>
-        <button>Login</button>
-    {% else %}
+        <button id="login" class="button" onclick="window.location.href='/login'">Login</button>
+  {% else %}
         <p>{{ followed }}</p>
-    {% endif %}}
-{% endblock %}}
+  {% endif %}
+{% endblock %}

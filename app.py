@@ -13,7 +13,6 @@ from flask import Flask, request, redirect, session, url_for, render_template, f
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy.cache_handler import FlaskSessionCacheHandler
-from spotipy.exceptions import SpotifyException
 
 
 app = Flask(__name__)
@@ -34,7 +33,7 @@ redirect_uri = 'http://localhost:3000/callback'
 scope = "playlist-read-private,playlist-read-collaborative,user-top-read"
 
 # FOR OPEN AI API
-USER_KEY = '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'
+USER_KEY = 'sk-proj-PtN3n31ym8sGSI417tvnT3BlbkFJbYjp0LT96rVF8KcXAghz'
 
 # Create an OpenAPI client
 client = OpenAI(api_key=USER_KEY)
@@ -60,24 +59,25 @@ def hello_world():
 
 @app.route('/home')
 def home():
+  print(f'HOME', sp_oauth.get_access_token())
   return render_template('home.html')
 
 # Not a physical page, just a redirect
 @app.route('/login')
 def login():
-
   # Check if user is logged in
   if not sp_oauth.validate_token(cache_handler.get_cached_token()):
     session['redirect_url'] = url_for('home', _external=True)
     auth_url = sp_oauth.get_authorize_url() #not logged in, take them to log in
     return redirect(auth_url)
-
+    
   return redirect(url_for('home'))
 
 @app.route('/callback')
 def callback():
-  sp_oauth.get_access_token(request.args['code'])
-  return redirect(url_for('insights'))
+  token_info = sp_oauth.get_access_token(request.args['code'])
+  print(f' HERE' , token_info)
+  return redirect(url_for('home'))
 
 @app.route('/history_form')
 def history_form():
@@ -91,20 +91,28 @@ def history_form():
     • Endpoint for most played artists/songs (get top artists/tracks)
     ◦Grab Spotify data (JSON), clean up, & store in DB
     ◦ Allow for user input and store into database as well
+
+    Functions:
+
+      Are they logged in?
+        if they are, run Retrieve
+        if not, print error message, have two buttons: home and login
+      Retrieve User's top songs/artists
   """
   error_message = ""
+  followed = ""
 
   token_info = cache_handler.get_cached_token()
   if not sp_oauth.validate_token(token_info):
     error_message = "You are not logged in, so we cannot access your Spotify information! Please Log in"
-    return redirect(url_for('home'))
+    # return redirect(url_for(''))
   
   try:
     followed = sp.current_user_followed_artists(limit=20, after=None)
   except SpotifyException as e:
-    error_message = f"An error occurred: {e}"
-  else:
-    return redirect(url_for('history_form'))
+    error_message += f" \n An error occurred: {e}"
+  finally:
+    return render_template('history_form.html', followed = followed, error_message = error_message)
 
 
   # print()
@@ -113,7 +121,9 @@ def history_form():
   # print(top_artists)
   # print(top_tracks)
 
-  return render_template('history_form.html', followed = followed, error_message = error_message)
+
+  # return render_template('history_form.html')
+
 
 
 # Adding User Form page to website
@@ -268,7 +278,11 @@ def make_urls_clickable(text):
 def insights():
   
   # Check if user is logged in
-  if not sp_oauth.validate_token(cache_handler.get_cached_token()):
+  token_info = sp_oauth.get_access_token() 
+  print(f'INSIGHTS', token_info)
+  validate_info = sp_oauth.validate_token(token_info)
+  print(f'INSIGHTS 2', validate_info)
+  if not validate_info:
     auth_url = sp_oauth.get_authorize_url() #not logged in, take them to log in
     return redirect(auth_url)
   

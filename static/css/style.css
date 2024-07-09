@@ -21,6 +21,7 @@
 
 body {
   background-color: var(--cream);
+  margin: 20px; /* Adds a margin of 20 pixels to all sides of the body */
 } 
 
 h1, h2 {
@@ -39,17 +40,17 @@ a {
 
 a:hover {
   color: #F5CAE8; 
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 /* Nav Bar Styles */
 nav {
-  width: 100vw;
+  width: 93vw;
   border: solid black 1px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 10px 10px;
 }
 
 .features {
@@ -66,6 +67,7 @@ nav {
 
 #webtitle {
   font-family: var(--header);
+  font-size: 2rem;
   color: var(--green);
   flex-grow: 1;
   text-align: center;
