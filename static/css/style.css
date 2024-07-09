@@ -1,0 +1,76 @@
+/* static/css/style.css */
+
+/* Variable for colors and fonts */
+:root {
+  --cream: #FCF8F3; /* Main Background Color */
+  --purple: #635985;
+  --green: #B2B932;
+  --light-pink: #F5CAE8;
+  --pink: #ee6b92;
+  --orange: #ED6618;
+  --aqua: #9EC8A9;
+  --header: "Shrikhand", serif; /* Fancy font */
+  --text: "Inter", sans-serif; /* Basic Font*/
+}
+
+* {
+  font-family: var(--text);
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background-color: var(--cream);
+} 
+
+h1, h2 {
+  font-family: var(--header);
+  color: #E63A26;
+}
+
+p {
+  color: #6EB8BE; 
+}
+
+a {
+  color: #E63A26; 
+  text-decoration: none;
+}
+
+a:hover {
+  color: #F5CAE8; 
+  text-decoration: underline;
+}
+
+/* Nav Bar Styles */
+nav {
+  width: 100vw;
+  border: solid black 1px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.features {
+  display: flex;
+  gap: 20px;
+}
+
+.button {
+  font-weight: bold;
+  padding: 5px;
+  border: solid black 2px;
+  min-width: 50px;
+}
+
+#webtitle {
+  font-family: var(--header);
+  color: var(--green);
+  flex-grow: 1;
+  text-align: center;
+}
+
+#login {
+  margin-left: auto;
+}

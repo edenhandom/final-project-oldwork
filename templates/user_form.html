@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Form</title>
+    
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Syne:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 2.5rem; /* Adjust as needed */
+            margin-top: 20px; /* Example margin top */
+        }
+    </style>
+
+</head>
+<body>
+
+    <nav>
+        <div class="features">
+          <a class="button" href="/history_form">History Form</a>
+          <a class="button" href="/insights">Insights</a>
+          <a class="button" href="/user_form">User Form</a>
+        </div>
+    
+        <a id='webtitle' href="/home">Mood Mix</a>
+        <button id="login" class="button" onclick="window.location.href='/login'">Login</button>
+      </nav>
+    
+      <br>
+    <h1>Enter Your Information</h1>
+    <form action="{{ url_for('user_form') }}" method="POST">
+        {{ form.hidden_tag() }}
+        
+        <br>
+        <div>
+            {{ form.star_sign.label }}
+            {{ form.star_sign(size=32) }}
+        </div>
+        <br>
+        <div>
+            {{ form.personality_traits.label }}
+            {{ form.personality_traits(rows=4, cols=50) }}
+        </div>
+        <br>
+        <div>
+            {{ form.fav_genre1.label }}
+            {{ form.fav_genre1(size=32) }}
+        </div>
+        <br>
+        <div>
+            {{ form.fav_genre2.label }}
+            {{ form.fav_genre2(size=32) }}
+        </div>
+        <br>
+        <div>
+            {{ form.fav_genre3.label }}
+            {{ form.fav_genre3(size=32) }}
+        </div>
+        <br>
+        {{ form.submit() }}
+    </form>
+</body>
+</html>
