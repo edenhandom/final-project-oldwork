@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, request, redirect, session, url_for
+from flask import Flask, request, redirect, session, url_for, render_template
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy.cache_handler import FlaskSessionCacheHandler
@@ -30,17 +30,13 @@ sp = Spotify(auth_manager=sp_oauth)
 
 
 @app.route('/')
+def hello_world():
+  return render_template('home.html')
+
+
 @app.route('/home')
 def home():
-  #return redirect(url_for('home'))
-  playlists_html = '<h1>Hello</h1>'
-
-  return playlists_html
-
-  # Check if user is logged in
-  
-  
-  #return redirect(url_for)
+  return render_template('home.html')
 
 # Not a physical page, just a redirect
 @app.route('/login')
@@ -55,11 +51,11 @@ def login():
 
 @app.route('/history_form')
 def history_form():
-    pass
+  return render_template('history_form.html')
 
 @app.route('/horoscope_form')
 def horoscope_form():
-    pass
+  return render_template('horoscope_form.html')
 
 
 @app.route('/callback')
@@ -71,6 +67,7 @@ def callback():
 @app.route('/insights')
 def insights():
   # Check if user is logged in
+  '''
   if not sp_oauth.validate_token(cache_handler.get_cached_token()):
     auth_url = sp_oauth.get_authorize_url() #not logged in, take them to log in
     return redirect(auth_url)
@@ -80,6 +77,9 @@ def insights():
   playlists_html = '<br>'.join([f'{name}: {url}' for name, url in playlists_info])
 
   return playlists_html
+  '''
+  return render_template('insights.html')
+  
 
 @app.route('/logout')
 def logout():
