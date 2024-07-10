@@ -3,7 +3,9 @@
 
 {% block content %}
   {% if error_message %}
+        <br>
         <p>{{ error_message }} </p>
+        <br>
         <button id="login" class="button" onclick="window.location.href='/login'">Login</button>
   {% else %}
         <p>{{ followed }}</p>

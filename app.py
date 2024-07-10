@@ -33,7 +33,7 @@ redirect_uri = 'http://localhost:3000/callback'
 scope = "playlist-read-private,playlist-read-collaborative,user-top-read"
 
 # FOR OPEN AI API
-USER_KEY = 'sk-proj-PtN3n31ym8sGSI417tvnT3BlbkFJbYjp0LT96rVF8KcXAghz'
+USER_KEY = 'sk-proj-Wnlh67voIWFcHgYyMc8BT3BlbkFJJY0LIEKHq4UCRTzmCgH6'
 
 # Create an OpenAPI client
 client = OpenAI(api_key=USER_KEY)
@@ -41,6 +41,7 @@ client = OpenAI(api_key=USER_KEY)
 
 
 cache_handler = FlaskSessionCacheHandler(session)
+#look into this
 sp_oauth = SpotifyOAuth(
   client_id=CLIENT_ID,
   client_secret=CLIENT_SECRET,
@@ -68,7 +69,7 @@ def login():
   # Check if user is logged in
   if not sp_oauth.validate_token(cache_handler.get_cached_token()):
     session['redirect_url'] = url_for('home', _external=True)
-    auth_url = sp_oauth.get_authorize_url() #not logged in, take them to log in
+    auth_url = sp_oauth.get_authorize_url() # Not logged in, take user to log in
     return redirect(auth_url)
     
   return redirect(url_for('home'))
@@ -104,7 +105,7 @@ def history_form():
 
   token_info = cache_handler.get_cached_token()
   if not sp_oauth.validate_token(token_info):
-    error_message = "You are not logged in, so we cannot access your Spotify information! Please Log in"
+    error_message = "You are not logged in, so we cannot access your Spotify information! Please log in."
     # return redirect(url_for(''))
   
   try:
@@ -185,7 +186,7 @@ def submit_page():
         recommendations = get_chat_response(prompt)
         #print(recommendations)
         #rec_links = make_urls_clickable(recommendations)
-        #song_list = extract_song_titles(recommendations)
+        song_list = extract_song_titles(recommendations)
         
         # This code doesn't work right now
         '''
@@ -203,7 +204,7 @@ def submit_page():
         return render_template('submit_page.html', 
                                title='Submitted Data', 
                                user_data=user_data, 
-                               recommendations=recommendations
+                               recommendations=song_list
                                )
         
         
@@ -214,12 +215,14 @@ def submit_page():
 
 # Extract a song title from Chat GPT response
 def extract_song_titles(input_string):
+    
     # Regular expression pattern to match the song titles
     pattern = r'"([^"]+)"'
     
     # Using re.findall to extract all occurrences of the pattern
-    matches = re.sub(r'^[^"]*"', '', input_string)
-    
+    #matches = re.sub(r'^[^"]*"', '', input_string)
+    matches = re.findall(pattern, input_string)
+
     # Return the list of song titles
     return matches
 
