@@ -15,6 +15,28 @@ from spotipy.oauth2 import SpotifyOAuth
 from spotipy.cache_handler import FlaskSessionCacheHandler
 
 
+# new !
+import requests
+import urllib.parse
+from datetime import datetime
+from flask import Flask, redirect, request, jsonify, session
+
+
+app = Flask(__name__)
+#app.config['SECRET_KEY'] = os.urandom(64)
+app.secret_key = '53d355f8-571a-4590-a310-1f95579440851'
+
+# FOR SPOTIFY API
+CLIENT_ID='8d7ad77d655b4509a54d8f842b409e2e'
+CLIENT_SECRET='fe0c23212bfe46858fc51a15c1fa6606'
+REDIRECT_URI='http://localhost:5000/callback'
+
+AUTH_URL = 'https://accounts.spotify.com/authorize'
+TOKEN_URL = 'https://accounts.spotify.com/api/token'
+API_BASE_URL = 'https://api.spotify.com/v1/'
+
+''''
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(64)
 
@@ -25,54 +47,46 @@ app.config['SECRET_KEY'] = os.urandom(64)
 CLIENT_ID = 'ad91a46157df4ba080456f92c7a74ef8'
 CLIENT_SECRET = '9d4140d511c64467a582b075b990cbfe'
 
-'''
+
 Something wrong with our callback? I changed it to 3000 but idk what that did
 Maybe it has to match our port?
-'''
+
 redirect_uri = 'http://localhost:3000/callback'
 scope = "playlist-read-private,playlist-read-collaborative,user-top-read"
+'''
 
 # FOR OPEN AI API
-USER_KEY = 'sk-proj-Wnlh67voIWFcHgYyMc8BT3BlbkFJJY0LIEKHq4UCRTzmCgH6'
-
+USER_KEY = 'sk-proj-YpstCq5l1SV5TtdFfr2lT3BlbkFJdnP8dkoexI8MXp3Mxb01'
 # Create an OpenAPI client
 client = OpenAI(api_key=USER_KEY)
-    
 
-
-cache_handler = FlaskSessionCacheHandler(session)
-#look into this
-sp_oauth = SpotifyOAuth(
-  client_id=CLIENT_ID,
-  client_secret=CLIENT_SECRET,
-  redirect_uri=redirect_uri,
-  scope=scope,
-  show_dialog=True
-)
-
-sp = Spotify(auth_manager=sp_oauth)
 
 
 @app.route('/')
 def hello_world():
   return render_template('home.html')
 
+# User clicked login button vvv
+@app.route('/login')
+def login():
+  scope = 'user-read-private user-read-email'
+
+  params = {
+    'client_id': CLIENT_ID,
+    'response_type': 'code',
+    'scope': scope,
+    'redirect_uri': REDIRECT_URI,
+    'show_dialog': True # usually false -> for testing purposes
+  }
+
+  auth_url = f"{AUTH_URL}?{urllib.parse.urlencode(params)}"
+
+  return redirect(auth_url)
 
 @app.route('/home')
 def home():
-  print(f'HOME', sp_oauth.get_access_token())
   return render_template('home.html')
 
-# Not a physical page, just a redirect
-@app.route('/login')
-def login():
-  # Check if user is logged in
-  if not sp_oauth.validate_token(cache_handler.get_cached_token()):
-    session['redirect_url'] = url_for('home', _external=True)
-    auth_url = sp_oauth.get_authorize_url() # Not logged in, take user to log in
-    return redirect(auth_url)
-    
-  return redirect(url_for('home'))
 
 @app.route('/callback')
 def callback():
@@ -188,8 +202,7 @@ def submit_page():
         #rec_links = make_urls_clickable(recommendations)
         song_list = extract_song_titles(recommendations)
         
-        # This code doesn't work right now
-        '''
+        # This code doesn't work right now but may function if we can login
         song_ids = []
         for song in song_list:
             track_id = get_track_id(song)
@@ -199,8 +212,8 @@ def submit_page():
                song_ids.append(track_id)
         
         # Broken
-        song_links = [get_song_link(id) for id in song_ids if id]        
-        '''
+        #song_links = [get_song_link(id) for id in song_ids if id]        
+        
         return render_template('submit_page.html', 
                                title='Submitted Data', 
                                user_data=user_data, 
@@ -220,7 +233,6 @@ def extract_song_titles(input_string):
     pattern = r'"([^"]+)"'
     
     # Using re.findall to extract all occurrences of the pattern
-    #matches = re.sub(r'^[^"]*"', '', input_string)
     matches = re.findall(pattern, input_string)
 
     # Return the list of song titles
@@ -228,38 +240,23 @@ def extract_song_titles(input_string):
 
 
 '''
-This function is broken, can't get track ID from track name
+This works now!!!!! ha ha ha
 '''
 # Get track ID from a track name
 def get_track_id(track_name):
-    token_info = sp_oauth.get_access_token()
-    access_token = token_info['access_token']
-    base_url = 'https://api.spotify.com/v1/search'
     
-    # Debug
-    # print(track_name.replace(' ','+'))
-    # print(track_name)
-
-    params = {
-        'q': track_name,
-        'type': 'track',
-        'limit': 1
-    }
-    headers = {
-        'Authorization': access_token
-    }
-
-    response = requests.get(base_url, params=params, headers=headers)
-    print("Response status code:", response.status_code) # Debug
+    base_url = 'https://api.spotify.com/v1/search'
+    searchResults = sp.search(q="track:" + track_name, type="track", limit=1)
+    tracks = searchResults.get('tracks', {}).get('items', [])
+    if tracks:
+        return tracks[0]['id']
+    else:
+        return None
 
 
-    if response.status_code == 200:
-        data = response.json()
-        if data['tracks']['items']:
-            track_id = data['tracks']['items'][0]['id']
-            return track_id
-    return None
-
+'''
+Try to make this work
+'''
 # Get a song link from a track ID
 def get_song_link(track_id):
     # Base URL for Spotify track links
